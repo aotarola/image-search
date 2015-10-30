@@ -10,7 +10,7 @@ TBD!
 
 - [ ] User can click on "settings" which allows selection of advanced search options to filter results
 
-- User can configure advanced search filters such as:
+- [ ] User can configure advanced search filters such as:
 
   - [ ] Size (small, medium, large, extra-large)
   - [ ] Color filter (black, blue, brown, gray, green, etc...)
