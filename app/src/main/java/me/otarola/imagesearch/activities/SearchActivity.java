@@ -123,7 +123,7 @@ public class SearchActivity extends AppCompatActivity {
     public void fetchResults(String query, boolean shouldClearResults,int page) {
         AsyncHttpClient client = new AsyncHttpClient();
         String searchURl = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="+query+ "&rsz=8&start=" + String.valueOf(page) ;
- 
+
         if(shouldClearResults) {
             aImageResult.clear();
         }

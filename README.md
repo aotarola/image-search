@@ -29,4 +29,4 @@ TBD!
 - [ ] **Advanced**: Replace Filter Settings Activity with a lightweight modal overlay
 - [ ] **Advanced**: Improve the user interface and experiment with image assets and/or styling and coloring
 - [x] **Bonus**: Use the StaggeredGridView to display improve the grid of image results
-- [ ] **Bonus**: User can zoom or pan images displayed in full-screen detail view
+- [x] **Bonus**: User can zoom or pan images displayed in full-screen detail view

@@ -27,4 +27,6 @@ dependencies {
     compile 'com.loopj.android:android-async-http:1.4.9'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.etsy.android.grid:library:1.0.5'
+    compile 'com.diegocarloslima:byakugallery:0.1.+@aar'
+
 }
