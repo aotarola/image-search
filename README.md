@@ -25,7 +25,7 @@ TBD!
 
 - [x] **Advanced**: Robust error handling, check if internet is available, handle error cases, network failures
 - [x] **Advanced**: Use the ActionBar SearchView or custom layout as the query box instead of an EditText
-- [ ] **Advanced**: User can share an image to their friends or email it to themselves
+- [x] **Advanced**: User can share an image to their friends or email it to themselves
 - [x] **Advanced**: Replace Filter Settings Activity with a lightweight modal overlay
 - [x] **Advanced**: Improve the user interface and experiment with image assets and/or styling and coloring
 - [x] **Bonus**: Use the StaggeredGridView to display improve the grid of image results
