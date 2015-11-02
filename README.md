@@ -4,6 +4,8 @@
 
 TBD!
 
+## Time Spent: 5 hours
+
 ## Stories implemented
 
 - [x] User can enter a search query that will display a grid of image results from the Google Image API.
