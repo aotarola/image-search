@@ -23,8 +23,8 @@ TBD!
 
 ## Optional stories:
 
-- [ ] **Advanced**: Robust error handling, check if internet is available, handle error cases, network failures
-- [ ] **Advanced**: Use the ActionBar SearchView or custom layout as the query box instead of an EditText
+- [x] **Advanced**: Robust error handling, check if internet is available, handle error cases, network failures
+- [x] **Advanced**: Use the ActionBar SearchView or custom layout as the query box instead of an EditText
 - [ ] **Advanced**: User can share an image to their friends or email it to themselves
 - [ ] **Advanced**: Replace Filter Settings Activity with a lightweight modal overlay
 - [ ] **Advanced**: Improve the user interface and experiment with image assets and/or styling and coloring

@@ -1,14 +1,21 @@
 package me.otarola.imagesearch.activities;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,7 +44,6 @@ import me.otarola.imagesearch.R;
 
 public class SearchActivity extends AppCompatActivity {
 
-    private EditText etQuery;
     private StaggeredGridView gvResults;
     private ArrayList<ImageResult> imageResults;
     private ImageResultAdapter aImageResult;
@@ -58,15 +64,39 @@ public class SearchActivity extends AppCompatActivity {
         gvResults.setAdapter(aImageResult);
     }
 
+    private Boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_search, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                currentSearchQuery = query;
+                fetchResults(currentSearchQuery, true, 0);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
         return true;
     }
 
     private void setupViews() {
-        etQuery = (EditText) findViewById(R.id.etQuery);
         gvResults = (StaggeredGridView) findViewById(R.id.gvResults);
 
         LayoutInflater layoutInflater = getLayoutInflater();
@@ -75,9 +105,18 @@ public class SearchActivity extends AppCompatActivity {
         gvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(SearchActivity.this, ImageDisplayActivity.class);
+                Intent i;
+                ImageResult result;
 
-                ImageResult result = imageResults.get(position);
+                if(!isNetworkAvailable()){
+                    Toast.makeText(SearchActivity.this, "Network unavailable :(", Toast.LENGTH_SHORT)
+                            .show();
+                    return;
+                }
+
+                i = new Intent(SearchActivity.this, ImageDisplayActivity.class);
+
+                result = imageResults.get(position);
 
                 i.putExtra("url", result.fullUrl);
 
@@ -115,14 +154,15 @@ public class SearchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void onImageSearch(View view) {
-        currentSearchQuery = etQuery.getText().toString();
-        fetchResults(currentSearchQuery, true, 0);
-    }
-
     public void fetchResults(String query, boolean shouldClearResults,int page) {
         AsyncHttpClient client = new AsyncHttpClient();
         String searchURl = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="+query+ "&rsz=8&start=" + String.valueOf(page) ;
+
+        if(!isNetworkAvailable()){
+            Toast.makeText(SearchActivity.this, "Network unavailable :(", Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
 
         if(shouldClearResults) {
             aImageResult.clear();
