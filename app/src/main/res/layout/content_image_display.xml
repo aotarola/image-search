@@ -14,7 +14,7 @@
     <com.diegocarloslima.byakugallery.lib.TouchImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/ivImageResult"
+        android:id="@+id/ivImage"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"

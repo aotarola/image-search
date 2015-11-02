@@ -214,7 +214,9 @@ public class SearchActivity extends AppCompatActivity {
         AsyncHttpClient client = new AsyncHttpClient();
         String searchURl = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="+query+ "&rsz=8&start=" + String.valueOf(page) ;
 
-        searchURl = Filter.applyFilters(searchURl, filter);
+        if(filter != null) {
+            searchURl = Filter.applyFilters(searchURl, filter);
+        }
 
         Log.i("DEBUG|", searchURl);
 
