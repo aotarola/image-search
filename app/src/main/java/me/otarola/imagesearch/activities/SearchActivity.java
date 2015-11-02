@@ -2,6 +2,7 @@ package me.otarola.imagesearch.activities;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -22,9 +23,12 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.etsy.android.grid.StaggeredGridView;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -39,6 +43,7 @@ import cz.msebera.android.httpclient.Header;
 import me.otarola.imagesearch.adapters.ImageResultAdapter;
 import me.otarola.imagesearch.dialogs.SettingsDialog;
 import me.otarola.imagesearch.listeners.EndlessScrollListener;
+import me.otarola.imagesearch.models.Filter;
 import me.otarola.imagesearch.models.ImageResult;
 import me.otarola.imagesearch.R;
 
@@ -48,6 +53,9 @@ public class SearchActivity extends AppCompatActivity {
     private ArrayList<ImageResult> imageResults;
     private ImageResultAdapter aImageResult;
     private String currentSearchQuery;
+
+    //Filters
+    private Filter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,9 +153,57 @@ public class SearchActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            FragmentManager fm = getSupportFragmentManager();
-            SettingsDialog settingsDialog = SettingsDialog.newInstance("Settings");
-            settingsDialog.show(fm, "fragment_settings");
+            if(filter == null) {
+                filter = new Filter();
+            }
+//            FragmentManager fm = getSupportFragmentManager();
+//            SettingsDialog settingsDialog = SettingsDialog.newInstance("Settings");
+//            settingsDialog.show(fm, "fragment_settings");
+            boolean wrapInScrollView = true;
+            MaterialDialog dialog = new MaterialDialog.Builder(this)
+                    .title(R.string.settings_title)
+                    .customView(R.layout.settings_dialog, wrapInScrollView)
+                    .positiveText(R.string.ok)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
+                            TextView etSite = (TextView) materialDialog.getView().findViewById(R.id.etSite);
+                            Spinner spColor = (Spinner) materialDialog.getView().findViewById(R.id.spColor);
+                            Spinner spSize = (Spinner) materialDialog.getView().findViewById(R.id.spSize);
+                            Spinner spType = (Spinner) materialDialog.getView().findViewById(R.id.spType);
+
+                            filter.selectedSite = etSite.getText().toString();
+                            filter.selectedColor = spColor.getSelectedItemPosition();
+                            filter.selectedType = spType.getSelectedItemPosition();
+                            filter.selectedSize = spSize.getSelectedItemPosition();
+                        }
+                    })
+                    .showListener(new DialogInterface.OnShowListener() {
+                        @Override
+                        public void onShow(DialogInterface dialog) {
+                            MaterialDialog materialDialog = (MaterialDialog) dialog;
+                            View view = materialDialog.getView();
+                            if (filter.selectedSite != null) {
+                                TextView etSite = (TextView) view.findViewById(R.id.etSite);
+                                etSite.setText(filter.selectedSite);
+                            }
+                            if (filter.selectedColor != -1) {
+                                Spinner spColor = (Spinner) view.findViewById(R.id.spColor);
+                                spColor.setSelection(filter.selectedColor);
+                            }
+                            if (filter.selectedSize != -1) {
+                                Spinner spSize = (Spinner) view.findViewById(R.id.spSize);
+                                spSize.setSelection(filter.selectedSize);
+                            }
+                            if (filter.selectedType != -1) {
+                                Spinner spType = (Spinner) view.findViewById(R.id.spType);
+                                spType.setSelection(filter.selectedType);
+                            }
+                        }
+                    })
+                    .negativeText(R.string.cancel)
+                    .show();
+
             return true;
         }
 
@@ -157,6 +213,10 @@ public class SearchActivity extends AppCompatActivity {
     public void fetchResults(String query, boolean shouldClearResults,int page) {
         AsyncHttpClient client = new AsyncHttpClient();
         String searchURl = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="+query+ "&rsz=8&start=" + String.valueOf(page) ;
+
+        searchURl = Filter.applyFilters(searchURl, filter);
+
+        Log.i("DEBUG|", searchURl);
 
         if(!isNetworkAvailable()){
             Toast.makeText(SearchActivity.this, "Network unavailable :(", Toast.LENGTH_SHORT)
