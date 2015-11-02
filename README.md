@@ -2,7 +2,7 @@
 
 ## Demo Walkthrough
 
-TBD!
+![video walkthrough](demoImageSearcher.gif)
 
 ## Time Spent: 5 hours
 
