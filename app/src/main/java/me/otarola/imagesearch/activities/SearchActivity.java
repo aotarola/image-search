@@ -4,16 +4,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.etsy.android.grid.StaggeredGridView;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -25,15 +30,18 @@ import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 import me.otarola.imagesearch.adapters.ImageResultAdapter;
+import me.otarola.imagesearch.dialogs.SettingsDialog;
+import me.otarola.imagesearch.listeners.EndlessScrollListener;
 import me.otarola.imagesearch.models.ImageResult;
 import me.otarola.imagesearch.R;
 
 public class SearchActivity extends AppCompatActivity {
 
     private EditText etQuery;
-    private GridView gvResults;
+    private StaggeredGridView gvResults;
     private ArrayList<ImageResult> imageResults;
     private ImageResultAdapter aImageResult;
+    private String currentSearchQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,19 +53,9 @@ public class SearchActivity extends AppCompatActivity {
         setupViews();
 
         imageResults = new ArrayList<ImageResult>();
-        aImageResult = new ImageResultAdapter(this, imageResults);
+        aImageResult = new ImageResultAdapter(this, R.layout.item_image_result ,imageResults);
 
         gvResults.setAdapter(aImageResult);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
     }
 
     @Override
@@ -69,7 +67,11 @@ public class SearchActivity extends AppCompatActivity {
 
     private void setupViews() {
         etQuery = (EditText) findViewById(R.id.etQuery);
-        gvResults = (GridView) findViewById(R.id.gvResults);
+        gvResults = (StaggeredGridView) findViewById(R.id.gvResults);
+
+        LayoutInflater layoutInflater = getLayoutInflater();
+
+
         gvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -80,6 +82,17 @@ public class SearchActivity extends AppCompatActivity {
                 i.putExtra("url", result.fullUrl);
 
                 startActivity(i);
+            }
+        });
+
+        gvResults.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public boolean onLoadMore(int page, int totalItemsCount) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to your AdapterView
+                fetchResults(currentSearchQuery, false, page * 8);
+                // or customLoadMoreDataFromApi(totalItemsCount);
+                return true; // ONLY if more data is actually being loaded; false otherwise.
             }
         });
     }
@@ -93,6 +106,9 @@ public class SearchActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            FragmentManager fm = getSupportFragmentManager();
+            SettingsDialog settingsDialog = SettingsDialog.newInstance("Settings");
+            settingsDialog.show(fm, "fragment_settings");
             return true;
         }
 
@@ -100,23 +116,38 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     public void onImageSearch(View view) {
-        String query = etQuery.getText().toString();
+        currentSearchQuery = etQuery.getText().toString();
+        fetchResults(currentSearchQuery, true, 0);
+    }
+
+    public void fetchResults(String query, boolean shouldClearResults,int page) {
         AsyncHttpClient client = new AsyncHttpClient();
-        String searchURl = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="+query+ "&rsz=8";
+        String searchURl = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q="+query+ "&rsz=8&start=" + String.valueOf(page) ;
+ 
+        if(shouldClearResults) {
+            aImageResult.clear();
+        }
 
         client.get(searchURl, new JsonHttpResponseHandler(){
             JSONArray imageResultsJson;
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    imageResultsJson = response.getJSONObject("responseData").getJSONArray("results");
-                    imageResults.clear();
-                    aImageResult.addAll(ImageResult.fromJSONArray(imageResultsJson));
+                    if(!response.isNull("responseData")) {
+                        imageResultsJson = response.getJSONObject("responseData").getJSONArray("results");
+
+                        aImageResult.addAll(ImageResult.fromJSONArray(imageResultsJson));
+                    }
+                    else{
+                        Toast.makeText(SearchActivity.this, "No more results to display :(", Toast.LENGTH_SHORT)
+                                .show();
+                    }
                 } catch (JSONException e){
                     e.printStackTrace();
                 }
-                Log.i("INFO", imageResults.toString());
+
             }
+
         });
     }
 }

@@ -29,12 +29,13 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <GridView
+    <com.etsy.android.grid.StaggeredGridView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/gvResults"
         android:layout_below="@+id/etQuery"
-        android:numColumns="3"
+        app:item_margin="8dp"
+        app:column_count="2"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"

@@ -19,7 +19,7 @@ TBD!
 
 - [ ] Subsequent searches will have any filters applied to the search results
 - [x] User can tap on any image in results to see the image full-screen
-- [ ] User can scroll down “infinitely” to continue loading more image results (up to 8 pages)
+- [x] User can scroll down “infinitely” to continue loading more image results (up to 8 pages)
 
 ## Optional stories:
 
@@ -28,5 +28,5 @@ TBD!
 - [ ] **Advanced**: User can share an image to their friends or email it to themselves
 - [ ] **Advanced**: Replace Filter Settings Activity with a lightweight modal overlay
 - [ ] **Advanced**: Improve the user interface and experiment with image assets and/or styling and coloring
-- [ ] **Bonus**: Use the StaggeredGridView to display improve the grid of image results
+- [x] **Bonus**: Use the StaggeredGridView to display improve the grid of image results
 - [ ] **Bonus**: User can zoom or pan images displayed in full-screen detail view

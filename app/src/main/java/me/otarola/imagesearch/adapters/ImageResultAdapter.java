@@ -1,7 +1,10 @@
 package me.otarola.imagesearch.adapters;
 
+import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.text.Html;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.etsy.android.grid.util.DynamicHeightImageView;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -21,26 +25,53 @@ import me.otarola.imagesearch.models.ImageResult;
  */
 public class ImageResultAdapter extends ArrayAdapter<ImageResult> {
 
-    public ImageResultAdapter(Context context, List<ImageResult> images){
+    Activity activity;
+    int resource;
+
+    public ImageResultAdapter(Activity context, int resource, List<ImageResult> images){
         super(context, R.layout.item_image_result, images);
+        this.activity = context;
+        this.resource = resource;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageResult imageInfo = getItem(position);
 
-        if(convertView == null){
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_image_result, parent, false);
+        View row = convertView;
+        final ItemHolder holder;
+
+        if(row == null){
+            LayoutInflater inflater = activity.getLayoutInflater();
+            row = inflater.inflate(resource, parent, false);
+
+            holder = new ItemHolder();
+            holder.ivImage = (DynamicHeightImageView) row.findViewById(R.id.ivImage);
+            holder.tvTitle = (TextView) row.findViewById(R.id.tvTitle);
+            holder.tvContent = (TextView) row.findViewById(R.id.tvContent);
+
+            row.setTag(holder);
+        }
+        else{
+            holder = (ItemHolder) row.getTag();
         }
 
-        ImageView ivImage = (ImageView) convertView.findViewById(R.id.ivImage);
-        TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
-        //ivImage.setImageResource(0);
+        final ImageResult imageInfo = getItem(position);
 
-        tvTitle.setText(Html.fromHtml(imageInfo.title));
+        Picasso.with(getContext())
+                .load(imageInfo.thumbUrl)
+                .into(holder.ivImage);
 
-        Picasso.with(getContext()).load(imageInfo.thumbUrl).into(ivImage);
+        holder.ivImage.setHeightRatio(1.0);
+        holder.tvTitle.setText(Html.fromHtml(imageInfo.title));
+        holder.tvContent.setText(Html.fromHtml(imageInfo.content));
 
-        return convertView;
+        return row;
+    }
+
+
+    static class ItemHolder {
+        DynamicHeightImageView ivImage;
+        TextView tvTitle;
+        TextView tvContent;
     }
 }

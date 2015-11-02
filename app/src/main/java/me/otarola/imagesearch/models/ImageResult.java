@@ -13,12 +13,14 @@ public class ImageResult {
     public String fullUrl;
     public String thumbUrl;
     public String title;
+    public String content;
 
     public ImageResult(JSONObject json){
         try {
             this.fullUrl = json.getString("url");
             this.thumbUrl = json.getString("tbUrl");
             this.title = json.getString("title");
+            this.content = json.getString("content");
         } catch (JSONException e){
             e.printStackTrace();
         }
